@@ -1,0 +1,68 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+
+metadata:
+  name: doc-publish-solution
+  title: Solution To 'publish' Disadvantage Problem
+  description: The purpose of this template is to provide alterantive to 'publish'.
+  tags:
+    - solution
+    - publish
+    - disadvantage
+
+spec:
+  type: service
+  owner: employee.ldap@homedepot.com
+
+  parameters:
+    - title: Define The Secret
+      required:
+        - MY_SECRET
+      properties:
+        MY_SECRET:
+          title: repository secret
+          type: string
+          description: The Secret Attached To The Repository
+
+    - title: Choose a location
+      required:
+        - repoUrl
+      properties:
+        repoUrl:
+          title: Repository Location
+          type: string
+          ui:field: RepoUrlPicker
+          ui:options:
+            allowedHosts:
+              - github.com
+
+  steps:
+    - id: template
+      name: Fetch Skeleton + Template
+      action: fetch:template
+      input:
+        url: ./skeleton
+
+    - id: cretae
+      name: Create Repo And Insert Secrets
+      action: github:repo:create
+      input:
+        repoUrl: ${{ parameters.repoUrl }}
+        owner: 
+        secrets:
+          MY_SECRET: ${{parameters.MY_SECRET}}
+
+    - id: push
+      name: Fill With Content Already Created Repo
+      action: github:repo:push
+      input:
+        repoUrl: ${{ parameters.repoUrl }}
+
+    - id: triggering
+      name: Trigger Workflows
+      action: github:actions:dispatch
+      input:
+        repoUrl: ${{ parameters.repoUrl }}
+        workflowId: main.yaml
+        branchOrTagName: main
+
