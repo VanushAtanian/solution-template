@@ -64,5 +64,5 @@ spec:
       input:
         repoUrl: ${{ parameters.repoUrl }}
         workflowId: main.yaml
-        branchOrTagName: main
+        branchOrTagName: master
 
